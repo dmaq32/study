@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    async function loadUserProfile() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        window.location.href = '/';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/me/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки профиля');
+        }
+
+        const user = await response.json();
+        document.getElementById('profile-username').textContent = user.username;
+        document.getElementById('profile-fullname').textContent = user.full_name || 'Не указано';
+        document.getElementById('profile-email').textContent = user.email || 'Не указан';
+    } catch (error) {
+        console.error('Ошибка:', error);
+        localStorage.removeItem('access_token');
+        window.location.href = '/';
+    }
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .profile-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        .profile-info {
+            margin-bottom: 20px;
+        }
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h2 class="form-title">Ваш профиль</h2>
+        <div class="profile-info">
+            <p><strong>Имя пользователя:</strong> <span id="profile-username"></span></p>
+            <p><strong>Полное имя:</strong> <span id="profile-fullname"></span></p>
+            <p><strong>Email:</strong> <span id="profile-email"></span></p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Выйти</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        // Загрузка данных пользователя
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки профиля');
+                }
+
+                const user = await response.json();
+                document.getElementById('profile-username').textContent = user.username;
+                document.getElementById('profile-fullname').textContent = user.full_name || 'Не указано';
+                document.getElementById('profile-email').textContent = user.email || 'Не указан';
+            } catch (error) {
+                alert(error.message);
+                localStorage.removeItem('access_token');
+                window.location.href = '/';
+            }
+        }
+
+        // Выход из системы
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/';
+        });
+
+        // Загрузка профиля при открытии страницы
+        loadUserProfile();
+    </script>
+</body>
+</html>
